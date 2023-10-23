@@ -58,6 +58,18 @@ async function run() {
         console.log(result);
         res.send(result);
       });
+       
+
+    app.get("/details/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("id", id);
+      const query = {
+        _id: new ObjectId(id),
+      };
+      const result = await userCollection.findOne(query);
+      console.log(result);
+      res.send(result);
+    });
       
       
 
