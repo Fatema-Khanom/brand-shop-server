@@ -34,19 +34,16 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    //await client.connect();
     const userCollection = client.db("addProduct").collection("addproduct")
+    const productCollection = client.db('addProduct').collection('addproduct');
 
-     // post single data endpoint
-     app.post("/addproduct", async (req, res) => {
-        const product = req.body;
-        console.log("product", product);
-        const result = await userCollection.insertOne(product);
-        console.log(result);
-        res.send(result);
-      });
-
-      
+    app.post('/addproduct', async (req, res) => {
+      const newCoffee = req.body;
+      console.log(newCoffee);
+      const result = await productCollection.insertOne(newCoffee);
+      res.send(result);
+  })
       
       app.get("/addproduct/:brand", async (req, res) => {
         const brand = req.params.brand;
@@ -58,27 +55,45 @@ async function run() {
         console.log(result);
         res.send(result);
       });
-       
 
-    app.get("/details/:id", async (req, res) => {
+    app.get('/addproduct/id/:id', async (req, res) => {
       const id = req.params.id;
-      console.log("id", id);
-      const query = {
-        _id: new ObjectId(id),
-      };
-      const result = await userCollection.findOne(query);
-      console.log(result);
+      const query = { _id: new ObjectId(id) }
+      const result = await productCollection.findOne(query);
       res.send(result);
-    });
-      
-      
+  })
+    
+    app.put('/addproduct/id/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updatedProduct = req.body;
 
-      app.get("/addproduct", async (req, res) => {
-       
-        const result = await userCollection.find().toArray();
-        console.log(result);
+      const product = {
+          $set: {
+             
+
+                
+              name : updatedProduct.name,
+               brand : updatedProduct.brand,
+               rating : updatedProduct.rating,
+               type : updatedProduct.type,
+               price : updatedProduct.price,
+               description : updatedProduct.description,
+               photo : updatedProduct.photo,
+          }
+      }
+
+      const result = await productCollection.updateOne(filter, product, options);
+      res.send(result);
+  })
+
+      app.get('/addproduct', async (req, res) => {
+        const cursor = productCollection.find();
+        const result = await cursor.toArray();
         res.send(result);
-      });
+    })
+      
 
 
     // Send a ping to confirm a successful connection
